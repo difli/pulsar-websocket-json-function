@@ -12,7 +12,7 @@ The motivation behind this project is to address the requirement of many sinks, 
 
 - **Event-Based Routing**:
   - Routes messages to different Pulsar topics based on the `event_name` field in the payload.
-  - Example events: `new_register`, `other_event`.
+  - Example events: `new-register`, `other-event`.
 
 - **Dead Letter Queue**:
   - Unrecognized or invalid events are sent to a Dead Letter Queue (DLQ) for further investigation.

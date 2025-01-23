@@ -1,0 +1,19 @@
+tenant: streaming-demo
+namespace: titan
+name: websocket-json-function
+# Update to the absolute path of the function's package
+py: /Users/dieter.flick/Documents/development/workspaces/workspace-titanos/demo/websocket-json-function/websocket-json-function.py
+# className convention: filename.classname
+className: websocket-json-function.WebSocketToJsonFunction
+parallelism: 1
+inputs:
+ - persistent://streaming-demo/titan/device
+autoAck: true
+logTopic: persistent://streaming-demo/titan/log
+userConfig:
+  logging_level: INFO
+  service_url: pulsar+ssl://pulsar-gcp-uscentral1.streaming.datastax.com:6651
+  auth_token: eyJhb...
+  new_register_topic : persistent://streaming-demo/titan/in-new-json
+  other_topic : persistent://streaming-demo/titan/in-new-json
+  dead_letter_topic : persistent://streaming-demo/titan/dead-letter

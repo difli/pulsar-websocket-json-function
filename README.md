@@ -27,42 +27,38 @@ The motivation behind this project is to address the requirement of many sinks, 
 
 ## **Requirements**
 
-1. Python 3.7+
-2. Pulsar Client Library:
-   ```bash
-   pip install pulsar-client
-   ```
-3. Astra Streaming Account (or Apache Pulsar 3.3.2 setup).
+- [Astra Streaming Account](https://astra.datastax.com)
 
 ---
 
 ## **Configuration**
 
 ### **1. Function Configuration**
-The function is configured using a YAML file for the Pulsar CLI. Below is an example:
 
+The function is configured using a YAML file. Make a copy of ([create-config.yaml.example](create-config.yaml.example)) and rename it to `create-config.yaml`. This file is used for the Pulsar CLI. Below is an example:
 ```yaml
 tenant: streaming-demo
-namespace: titan
+namespace: demo
 name: websocket-json-function
 py: /path/to/your/websocket-json-function.py
 className: websocket-json-function.WebSocketToJsonFunction
 parallelism: 1
 inputs:
- - persistent://streaming-demo/titan/device
+ - persistent://streaming-demo/demo/device
 autoAck: true
-logTopic: persistent://streaming-demo/titan/log
+logTopic: persistent://streaming-demo/demo/log
 userConfig:
   logging_level: INFO
   service_url: pulsar+ssl://pulsar-gcp-uscentral1.streaming.datastax.com:6651
   auth_token: YOUR_AUTH_TOKEN
-  new_register_topic: persistent://streaming-demo/titan/in-new-json
-  other_topic: persistent://streaming-demo/titan/in-other-json
-  dead_letter_topic: persistent://streaming-demo/titan/dead-letter
+  new_register_topic: persistent://streaming-demo/demo/in-new-json
+  other_topic: persistent://streaming-demo/demo/in-other-json
+  dead_letter_topic: persistent://streaming-demo/demo/dead-letter
 ```
 
 ### **2. Set Up Astra Streaming**
-Before setting up Astra Streaming, ensure you have [**Apache Pulsar 3.3.2**](https://archive.apache.org/dist/pulsar/pulsar-3.3.2/apache-pulsar-3.3.2-bin.tar.gz) installed and configured in the root of this project.
+
+Before setting up Astra Streaming, ensure you have [**Apache Pulsar 3.3.2**](https://archive.apache.org/dist/pulsar/pulsar-3.3.2/apache-pulsar-3.3.2-bin.tar.gz) installed and configured outside of this project at the same folder level as this project.
 
 1. **Download `client.conf`**:
    - Log in to your Astra Streaming dashboard and download the `client.conf` file.
@@ -71,17 +67,17 @@ Before setting up Astra Streaming, ensure you have [**Apache Pulsar 3.3.2**](htt
 2. **Create Topics**:
    - Navigate to the `apache-pulsar-3.3.2` directory and run the following commands:
      ```bash
-     bin/pulsar-admin topics create "persistent://streaming-demo/titan/device"
-     bin/pulsar-admin topics create "persistent://streaming-demo/titan/in-new-json"
-     bin/pulsar-admin topics create "persistent://streaming-demo/titan/in-other-json"
-     bin/pulsar-admin topics create "persistent://streaming-demo/titan/dead-letter"
-     bin/pulsar-admin topics create "persistent://streaming-demo/titan/log"
+     bin/pulsar-admin topics create "persistent://<tenant>/<namespace>/device"
+     bin/pulsar-admin topics create "persistent://<tenant>/<namespace>/in-new-json"
+     bin/pulsar-admin topics create "persistent://<tenant>/<namespace>/in-other-json"
+     bin/pulsar-admin topics create "persistent://<tenant>/<namespace>/dead-letter"
+     bin/pulsar-admin topics create "persistent://<tenant>/<namespace>/log"
      ```
 
 3. **Deploy the Function**:
    - Use the `create-config.yaml` file to deploy the function:
      ```bash
-     bin/pulsar-admin functions create --function-config-file create-config.yaml
+     bin/pulsar-admin functions create --function-config-file ../pulsar-websocket-json-function/create-config.yaml
      ```
 
 ---
@@ -94,11 +90,11 @@ Before setting up Astra Streaming, ensure you have [**Apache Pulsar 3.3.2**](htt
   - Unrecognized events are sent to the Dead Letter Queue.
 
 - **Input**: 
-  - Topic: `persistent://streaming-demo/titan/device`
+  - Topic: `persistent://<tenant>/<namespace>/device`
 
 - **Outputs**:
-  - `new_register_topic`: Processes messages with `event_name` = `new_register`.
-  - `other_topic`: Processes messages with `event_name` = `other_event`.
+  - `new_register_topic`: Processes messages with `event_name` = `new-register`.
+  - `other_topic`: Processes messages with `event_name` = `other-event`.
   - `dead_letter_topic`: Captures messages with unrecognized or missing `event_name`.
 
 - **Schema**:
@@ -133,10 +129,10 @@ Before setting up Astra Streaming, ensure you have [**Apache Pulsar 3.3.2**](htt
 
 ## **Logging and Monitoring**
 
-- All logs are published to `persistent://streaming-demo/titan/log`.
+- All logs are published to `persistent://<tenant>/<namespace>/log`.
 - Use the following command to monitor logs:
   ```bash
-  bin/pulsar-client consume -s log-reader persistent://streaming-demo/titan/log
+  bin/pulsar-client consume -s log-reader persistent://<tenant>/<namespace>/log
   ```
 
 ---
@@ -152,7 +148,7 @@ pip install websocket-client
 ```
 
 ### **2. Send a Test Message**
-Run the `websocket-send.py` script to send a test message to the `persistent://streaming-demo/titan/device` topic:
+Run the `websocket-send.py` script to send a test message to the `persistent://streaming-demo/demo/device` topic:
 ```bash
 python websocket-send.py
 ```
@@ -191,10 +187,10 @@ Use the following commands to consume messages from the respective topics:
 
 #### **Consume from `new_register_topic`**:
 ```bash
-bin/pulsar-client consume -s test-reader persistent://streaming-demo/titan/in-new-json
+bin/pulsar-client consume -s test-reader persistent://<tenant>/<namespace>/new-register
 ```
 
 #### **Consume from `dead_letter_topic`**:
 ```bash
-bin/pulsar-client consume -s test-reader persistent://streaming-demo/titan/dead-letter
+bin/pulsar-client consume -s test-reader persistent://<tenant>/<namespace>/dead-letter
 ```

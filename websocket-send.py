@@ -4,7 +4,7 @@ import base64
 
 # Pulsar credentials
 PULSAR_SERVICE_URL = 'pulsar+ssl://pulsar-gcp-uscentral1.streaming.datastax.com:6651'
-TOPIC = "wss://pulsar-gcp-uscentral1.streaming.datastax.com:8001/ws/v2/producer/persistent/streaming-demo/titan/device"
+TOPIC = "wss://pulsar-gcp-uscentral1.streaming.datastax.com:8001/ws/v2/producer/persistent/streaming-demo/demo/device"
 AUTH_TOKEN = "eyJh..."
 
 # Authorization header
